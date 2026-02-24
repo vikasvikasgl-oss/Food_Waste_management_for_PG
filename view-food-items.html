@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Food Items - PG Food Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>PG Food Management</h1>
+            <div class="nav-user">
+                <img id="userPhoto" alt="User Photo" class="user-photo">
+                <span id="userInfo"></span>
+                <button onclick="window.location.href='dashboard.html'" class="btn-logout">Back to Dashboard</button>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="page-header">
+            <h2>All Food Items</h2>
+            <div class="button-group">
+                <button onclick="loadFoodItems()" class="btn btn-primary">🔄 Refresh</button>
+                <button onclick="window.location.href='upload-food.html'" class="btn btn-primary btn-hidden" id="uploadFoodBtn">➕ Upload Food</button>
+            </div>
+        </div>       
+        <div id="foodItemsContainer">
+            <p>Loading food items...</p>
+        </div>
+    </div>
+
+    <script src="js/permissions.js"></script>
+    <script>
+        if (sessionStorage.getItem('loggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        requirePermission('viewAllFoodItems');
+        
+        const username = sessionStorage.getItem('username');
+        const role = sessionStorage.getItem('role');
+        document.getElementById('userInfo').textContent = `${username} (${role})`;
+        
+        // Display user photo if available
+        const photo = sessionStorage.getItem('userPhoto');
+        const photoEl = document.getElementById('userPhoto');
+        if (photo && photoEl) {
+            photoEl.src = photo;
+            photoEl.style.display = 'inline-block';
+        }
+        
+        applyPermissions();
+        
+        function loadFoodItems() {
+            const foodItems = JSON.parse(localStorage.getItem('foodItems') || '[]');
+            const container = document.getElementById('foodItemsContainer');
+            
+            if (hasPermission('uploadFood')) {
+                document.getElementById('uploadFoodBtn').classList.remove('btn-hidden');
+            } else {
+                document.getElementById('uploadFoodBtn').classList.add('btn-hidden');
+            }
+            
+            if (foodItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p class="empty-state-title">No food items available.</p>
+                        <p class="empty-state-text">Upload food items to see them here.</p>
+                        ${hasPermission('uploadFood') ? '<button onclick="window.location.href=\'upload-food.html\'" class="btn btn-primary empty-state-btn">Upload Food Item</button>' : ''}
+                    </div>
+                `;
+                return;
+            }
+            
+            const sortedItems = foodItems.sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt) : new Date(a.id);
+                const dateB = b.createdAt ? new Date(b.createdAt) : new Date(b.id);
+                return dateB - dateA;
+            });
+            
+            container.innerHTML = `
+                <div class="content-card">
+                    <div class="info-section">
+                        <strong>Total Items:</strong> ${foodItems.length}
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Quantity Available</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sortedItems.map(item => `
+                                <tr>
+                                    <td><strong>${item.title}</strong></td>
+                                    <td>${item.category}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>
+                                        <span class="status-badge ${item.status === 'available' ? 'status-available' : item.status === 'limited' ? 'status-limited' : 'status-out-of-stock'}">
+                                            ${item.status === 'available' ? '✅ Available' : item.status === 'limited' ? '⚠️ Limited' : '❌ Out of Stock'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        ${hasPermission('uploadFood') ? `<button onclick="editItem(${item.id})" class="btn btn-secondary btn-edit">Edit</button>` : ''}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        function editItem(itemId) {
+            const foodItems = JSON.parse(localStorage.getItem('foodItems') || '[]');
+            const item = foodItems.find(fi => fi.id === itemId);
+            
+            if (!item) {
+                alert('Item not found!');
+                return;
+            }
+            
+            const newTitle = prompt('Enter new title:', item.title);
+            if (newTitle === null) return;
+            
+            const newCategory = prompt('Enter new category:', item.category);
+            if (newCategory === null) return;
+            
+            const newQuantity = prompt('Enter new quantity:', item.quantity);
+            if (newQuantity === null) return;
+            
+            const newStatus = prompt('Enter new status (available/limited/out_of_stock):', item.status);
+            if (newStatus === null) return;
+            
+            item.title = newTitle;
+            item.category = newCategory;
+            item.quantity = parseInt(newQuantity);
+            item.status = newStatus;
+            
+            localStorage.setItem('foodItems', JSON.stringify(foodItems));
+            loadFoodItems();
+            alert('Item updated successfully!');
+        }
+        
+        loadFoodItems();
+    </script>
+</body>
+</html>

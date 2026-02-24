@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approve Cart Requests - PG Food Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>PG Food Management</h1>
+            <div class="nav-user">
+                <img id="userPhoto" alt="User Photo" class="user-photo">
+                <span id="userInfo"></span>
+                <button onclick="window.location.href='dashboard.html'" class="btn-logout">Back to Dashboard</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Approve Cart Requests</h2>
+        <div id="cartRequestsContainer"></div>
+    </div>
+
+    <script src="js/permissions.js"></script>
+    <script>
+        if (sessionStorage.getItem('loggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+        requirePermission('approveCartRequests');
+        
+        const username = sessionStorage.getItem('username');
+        const role = sessionStorage.getItem('role');
+        document.getElementById('userInfo').textContent = `${username} (${role})`;
+        
+        // Display user photo if available
+        const photo = sessionStorage.getItem('userPhoto');
+        const photoEl = document.getElementById('userPhoto');
+        if (photo && photoEl) {
+            photoEl.src = photo;
+            photoEl.style.display = 'inline-block';
+        }
+        
+        function loadCartRequests() {
+            const cartRequests = JSON.parse(localStorage.getItem('cartRequests') || '[]');
+            const pendingRequests = cartRequests.filter(req => req.status === 'pending');
+            
+            const container = document.getElementById('cartRequestsContainer');
+            
+            if (pendingRequests.length === 0) {
+                container.innerHTML = '<p>No pending cart requests.</p>';
+                return;
+            }
+            
+            container.innerHTML = pendingRequests.map(req => `
+                <div class="content-card-sm">
+                    <h3>Request from: ${req.userId}</h3>
+                    <p><strong>Items:</strong></p>
+                    <ul>
+                        ${req.items.map(item => `<li>${item.foodTitle} - Quantity: ${item.quantity}</li>`).join('')}
+                    </ul>
+                    <p><strong>Status:</strong> ${req.status}</p>
+                    <button onclick="approveRequest(${req.id})" class="btn btn-primary">Approve</button>
+                    <button onclick="rejectRequest(${req.id})" class="btn btn-secondary">Reject</button>
+                </div>
+            `).join('');
+        }
+        
+        function approveRequest(requestId) {
+            const cartRequests = JSON.parse(localStorage.getItem('cartRequests') || '[]');
+            const request = cartRequests.find(req => req.id === requestId);
+            if (request) {
+                request.status = 'approved';
+                request.approvedBy = username;
+                request.approvedAt = new Date().toISOString();
+                localStorage.setItem('cartRequests', JSON.stringify(cartRequests));
+                loadCartRequests();
+            }
+        }
+        
+        function rejectRequest(requestId) {
+            const cartRequests = JSON.parse(localStorage.getItem('cartRequests') || '[]');
+            const request = cartRequests.find(req => req.id === requestId);
+            if (request) {
+                request.status = 'rejected';
+                request.rejectedBy = username;
+                request.rejectedAt = new Date().toISOString();
+                localStorage.setItem('cartRequests', JSON.stringify(cartRequests));
+                loadCartRequests();
+            }
+        }
+        
+        loadCartRequests();
+    </script>
+</body>
+</html>

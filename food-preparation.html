@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Preparation - PG Food Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>PG Food Management</h1>
+            <div class="nav-user">
+                <img id="userPhoto" alt="User Photo" class="user-photo">
+                <span id="userInfo"></span>
+                <button onclick="window.location.href='dashboard.html'" class="btn-logout">Back to Dashboard</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Daily Food Preparation</h2>
+        
+        <div class="form-actions">
+            <label for="dateSelector">Select Date: </label>
+            <input type="date" id="dateSelector" onchange="loadDayPreparation()">
+            <button onclick="addPreparation()" class="btn btn-primary form-actions-left">Add Preparation Record</button>
+        </div>
+
+        <div id="preparationData" class="data-container">
+            <p>Select a date to view or add preparation data</p>
+        </div>
+    </div>
+
+    <script>
+        if (sessionStorage.getItem('loggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+        
+        const username = sessionStorage.getItem('username');
+        const role = sessionStorage.getItem('role');
+        document.getElementById('userInfo').textContent = `${username} (${role})`;
+        
+        // Display user photo if available
+        const photo = sessionStorage.getItem('userPhoto');
+        const photoEl = document.getElementById('userPhoto');
+        if (photo && photoEl) {
+            photoEl.src = photo;
+            photoEl.style.display = 'inline-block';
+        }
+        
+        document.getElementById('dateSelector').value = new Date().toISOString().split('T')[0];
+        loadDayPreparation();
+        
+        function loadDayPreparation() {
+            const date = document.getElementById('dateSelector').value;
+            const data = JSON.parse(localStorage.getItem('preparationData') || '{}');
+            const dayData = data[date] || null;
+            
+            const container = document.getElementById('preparationData');
+            
+            if (!dayData) {
+                container.innerHTML = `
+                    <div class="content-card">
+                        <p>No preparation data for ${date}. Click "Add Preparation Record" to add data.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="content-card">
+                    <h3>Preparation Data for ${date}</h3>
+                    <table class="table-spacing">
+                        <thead>
+                            <tr>
+                                <th>Meal Type</th>
+                                <th>Items Prepared</th>
+                                <th>Quantity</th>
+                                <th>Residents Served</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${dayData.meals.map(meal => `
+                                <tr>
+                                    <td>${meal.type}</td>
+                                    <td>${meal.items.join(', ')}</td>
+                                    <td>${meal.quantity}</td>
+                                    <td>${meal.residentsServed}</td>
+                                    <td>${meal.status}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        function addPreparation() {
+            const date = document.getElementById('dateSelector').value;
+            const mealType = prompt('Enter meal type (Breakfast/Lunch/Dinner):');
+            if (!mealType) return;
+            
+            const items = prompt('Enter items prepared (comma separated):').split(',').map(i => i.trim());
+            const quantity = prompt('Enter quantity:');
+            const residentsServed = parseInt(prompt('Enter number of residents served:') || '0');
+            const status = prompt('Enter status (Completed/In Progress):') || 'Completed';
+            
+            const data = JSON.parse(localStorage.getItem('preparationData') || '{}');
+            if (!data[date]) {
+                data[date] = { meals: [] };
+            }
+            
+            data[date].meals.push({
+                type: mealType,
+                items: items,
+                quantity: quantity,
+                residentsServed: residentsServed,
+                status: status
+            });
+            
+            localStorage.setItem('preparationData', JSON.stringify(data));
+            alert('Preparation record added!');
+            loadDayPreparation();
+        }
+    </script>
+</body>
+</html>

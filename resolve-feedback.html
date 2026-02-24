@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resolve Feedback - PG Food Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>PG Food Management</h1>
+            <div class="nav-user">
+                <img id="userPhoto" alt="User Photo" class="user-photo">
+                <span id="userInfo"></span>
+                <button onclick="window.location.href='dashboard.html'" class="btn-logout">Back to Dashboard</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Resolve Feedback</h2>
+        <div id="feedbacksContainer"></div>
+    </div>
+
+    <script src="js/permissions.js"></script>
+    <script>
+        if (sessionStorage.getItem('loggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+        requirePermission('resolveFeedback');
+        
+        const username = sessionStorage.getItem('username');
+        const role = sessionStorage.getItem('role');
+        document.getElementById('userInfo').textContent = `${username} (${role})`;
+        
+        // Display user photo if available
+        const photo = sessionStorage.getItem('userPhoto');
+        const photoEl = document.getElementById('userPhoto');
+        if (photo && photoEl) {
+            photoEl.src = photo;
+            photoEl.style.display = 'inline-block';
+        }
+        
+        function loadFeedbacks() {
+            const feedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+            const unresolved = feedbacks.filter(fb => !fb.resolved);
+            
+            const container = document.getElementById('feedbacksContainer');
+            
+            if (unresolved.length === 0) {
+                container.innerHTML = '<p>No unresolved feedback.</p>';
+                return;
+            }
+            
+            container.innerHTML = unresolved.map(fb => `
+                <div class="content-card-sm">
+                    <p><strong>From:</strong> ${fb.userId}</p>
+                    <p><strong>Target Type:</strong> ${fb.targetType}</p>
+                    <p><strong>Target ID:</strong> ${fb.targetId}</p>
+                    <p><strong>Rating:</strong> ${'⭐'.repeat(fb.rating)}</p>
+                    <p><strong>Comment:</strong> ${fb.comment}</p>
+                    <button onclick="resolveFeedback(${fb.id})" class="btn btn-primary">Mark as Resolved</button>
+                </div>
+            `).join('');
+        }
+        
+        function resolveFeedback(feedbackId) {
+            const feedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+            const feedback = feedbacks.find(fb => fb.id === feedbackId);
+            if (feedback) {
+                feedback.resolved = true;
+                feedback.resolvedBy = username;
+                feedback.resolvedAt = new Date().toISOString();
+                localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
+                loadFeedbacks();
+            }
+        }
+        
+        loadFeedbacks();
+    </script>
+</body>
+</html>

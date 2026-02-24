@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Food - PG Food Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>PG Food Management</h1>
+            <div class="nav-user">
+                <img id="userPhoto" alt="User Photo" class="user-photo">
+                <span id="userInfo"></span>
+                <button onclick="window.location.href='dashboard.html'" class="btn-logout">Back to Dashboard</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Upload Food Item</h2>
+        <form id="uploadFoodForm" class="form-container">            
+            <div class="form-group">
+                <label for="title">Food Title</label>
+                <input type="text" id="title" required>
+            </div>
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" required>
+                    <option value="">Select Category</option>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snacks">Snacks</option>
+                    <option value="Beverages">Beverages</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="quantity">Quantity Available</label>
+                <input type="number" id="quantity" required min="0">
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status" required>
+                    <option value="available">Available</option>
+                    <option value="limited">Limited</option>
+                    <option value="out_of_stock">Out of Stock</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload Food Item</button>
+        </form>
+        <div id="successMessage" class="success-message">            
+            ✅ Food item uploaded successfully! <a href="view-food-items.html" class="success-link">View all items</a>
+        </div>
+    </div>
+
+    <script src="js/permissions.js"></script>
+    <script>
+        if (sessionStorage.getItem('loggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        requirePermission('uploadFood');
+
+        const username = sessionStorage.getItem('username');
+        const role = sessionStorage.getItem('role');
+        document.getElementById('userInfo').textContent = `${username} (${role})`;
+        
+        // Display user photo if available
+        const photo = sessionStorage.getItem('userPhoto');
+        const photoEl = document.getElementById('userPhoto');
+        if (photo && photoEl) {
+            photoEl.src = photo;
+            photoEl.style.display = 'inline-block';
+        }
+        
+        document.getElementById('uploadFoodForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const foodItem = {
+                id: Date.now(),
+                title: document.getElementById('title').value,
+                category: document.getElementById('category').value,
+                quantity: parseInt(document.getElementById('quantity').value),
+                status: document.getElementById('status').value,
+                createdAt: new Date().toISOString()
+            };
+            
+            const foodItems = JSON.parse(localStorage.getItem('foodItems') || '[]');
+            foodItems.push(foodItem);
+            localStorage.setItem('foodItems', JSON.stringify(foodItems));
+            
+            const successMsg = document.getElementById('successMessage');
+            successMsg.style.display = 'block';
+            this.reset();
+            
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

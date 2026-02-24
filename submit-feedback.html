@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Feedback - PG Food Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>PG Food Management</h1>
+            <div class="nav-user">
+                <img id="userPhoto" alt="User Photo" class="user-photo">
+                <span id="userInfo"></span>
+                <button onclick="window.location.href='dashboard.html'" class="btn-logout">Back to Dashboard</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Submit Feedback</h2>
+        <form id="feedbackForm" class="form-container">
+            <div class="form-group">
+                <label for="targetType">Feedback For</label>
+                <select id="targetType" required>
+                    <option value="">Select Type</option>
+                    <option value="food_item">Food Item</option>
+                    <option value="cook">Cook</option>
+                    <option value="user">User</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="targetId">Target ID/Name</label>
+                <input type="text" id="targetId" placeholder="Enter food item name, cook name, or user name">
+            </div>
+            <div class="form-group">
+                <label for="rating">Rating (1-5)</label>
+                <input type="number" id="rating" min="1" max="5" required>
+            </div>
+            <div class="form-group">
+                <label for="comment">Comment</label>
+                <textarea id="comment" rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Feedback</button>
+        </form>
+    </div>
+
+    <script src="js/permissions.js"></script>
+    <script>
+        if (sessionStorage.getItem('loggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+        requirePermission('submitFeedback');
+        
+        const username = sessionStorage.getItem('username');
+        const role = sessionStorage.getItem('role');
+        document.getElementById('userInfo').textContent = `${username} (${role})`;
+        
+        // Display user photo if available
+        const photo = sessionStorage.getItem('userPhoto');
+        const photoEl = document.getElementById('userPhoto');
+        if (photo && photoEl) {
+            photoEl.src = photo;
+            photoEl.style.display = 'inline-block';
+        }
+        
+        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const feedback = {
+                id: Date.now(),
+                userId: username,
+                targetType: document.getElementById('targetType').value,
+                targetId: document.getElementById('targetId').value,
+                rating: parseInt(document.getElementById('rating').value),
+                comment: document.getElementById('comment').value,
+                resolved: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            const feedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+            feedbacks.push(feedback);
+            localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
+            
+            alert('Feedback submitted successfully!');
+            this.reset();
+        });
+    </script>
+</body>
+</html>

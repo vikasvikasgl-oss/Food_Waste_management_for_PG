@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PG Food Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>PG Food Management</h1>
+            <div class="nav-user">
+                <img id="userPhoto" alt="User Photo" class="user-photo">
+                <span id="userInfo"></span>
+                <button onclick="logout()" class="btn-logout">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>Dashboard</h2>
+            <p>Welcome to PG Food Management System</p>
+        </div>
+
+        <div class="cards-grid">
+            <!-- Upload Food - Admin & Cook -->
+            <div class="card" data-permission="uploadFood" onclick="window.location.href='upload-food.html'">
+                <div class="card-icon">📤</div>
+                <h3>Upload Food</h3>
+                <p>Add new food items to the system</p>
+            </div>
+
+            <!-- Approve Cart Requests - Admin Only -->
+            <div class="card" data-permission="approveCartRequests" onclick="window.location.href='approve-cart-requests.html'">
+                <div class="card-icon">✅</div>
+                <h3>Approve Cart Requests</h3>
+                <p>Review and approve resident cart requests</p>
+            </div>
+
+            <!-- Submit Cart Request - Resident Only -->
+            <div class="card" data-permission="submitCartRequest" onclick="window.location.href='cart-request.html'">
+                <div class="card-icon">🛒</div>
+                <h3>Submit Cart Request</h3>
+                <p>Request food items for your cart</p>
+            </div>
+
+            <!-- View All Food Items - All Roles -->
+            <div class="card" data-permission="viewAllFoodItems" onclick="window.location.href='view-food-items.html'">
+                <div class="card-icon">🍽️</div>
+                <h3>View All Food Items</h3>
+                <p>Browse available food items</p>
+            </div>
+
+            <!-- Submit Feedback - All Roles -->
+            <div class="card" data-permission="submitFeedback" onclick="window.location.href='submit-feedback.html'">
+                <div class="card-icon">💬</div>
+                <h3>Submit Feedback</h3>
+                <p>Share your feedback about food, cooks, or service</p>
+            </div>
+
+            <!-- Resolve Feedback - Admin Only -->
+            <div class="card" data-permission="resolveFeedback" onclick="window.location.href='resolve-feedback.html'">
+                <div class="card-icon">📋</div>
+                <h3>Resolve Feedback</h3>
+                <p>View and resolve submitted feedback</p>
+            </div>
+
+            <!-- Submit Complaints - All Roles -->
+            <div class="card" data-permission="submitComplaints" onclick="window.location.href='submit-complaint.html'">
+                <div class="card-icon">⚠️</div>
+                <h3>Submit Complaint</h3>
+                <p>Report issues or complaints</p>
+            </div>
+
+            <!-- Resolve Complaints - Admin Only -->
+            <div class="card" data-permission="resolveComplaints" onclick="window.location.href='resolve-complaints.html'">
+                <div class="card-icon">🔧</div>
+                <h3>Resolve Complaints</h3>
+                <p>View and resolve submitted complaints</p>
+            </div>
+
+            <!-- Previous Month Data - Admin & Cook -->
+            <div class="card" data-permission="viewPreviousMonth" onclick="window.location.href='previous-month.html'">
+                <div class="card-icon">📊</div>
+                <h3>Previous Month Data</h3>
+                <p>View and analyze last month's food consumption</p>
+            </div>
+
+            <!-- Next Month Plan - Admin & Cook -->
+            <div class="card" data-permission="viewNextMonthPlan" onclick="window.location.href='next-month-plan.html'">
+                <div class="card-icon">📅</div>
+                <h3>Next Month Plan</h3>
+                <p>Generate food preparation plan for next month</p>
+            </div>
+
+            <!-- Food Preparation - Admin & Cook -->
+            <div class="card" data-permission="manageFoodPreparation" onclick="window.location.href='food-preparation.html'">
+                <div class="card-icon">👨‍🍳</div>
+                <h3>Food Preparation</h3>
+                <p>Manage daily food preparation tasks</p>
+            </div>
+        </div>
+
+        <div class="quick-stats" data-permission="viewPreviousMonth">
+            <h3>Quick Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Total Residents</h4>
+                    <p id="totalResidents">-</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Avg Daily Meals</h4>
+                    <p id="avgDailyMeals">-</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Monthly Budget</h4>
+                    <p id="monthlyBudget">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/permissions.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

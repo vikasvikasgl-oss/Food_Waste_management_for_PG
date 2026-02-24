@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PG Food Management - Login</title>
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box" id="loginBox">
+            <h1>PG Food Management</h1>
+            <h2 id="formTitle">Login</h2>
+            
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="cook">Cook</option>
+                        <option value="resident">Resident</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-login">Login</button>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" id="forgotPasswordLink" style="color: #ff6b6b; text-decoration: none; font-size: 14px; font-weight: 500;">Forgot Password?</a>
+                </div>
+            </form>
+
+            <!-- Signup Form (Hidden by default) -->
+            <form id="signupForm" class="form-hidden">
+                <div class="form-group">
+                    <label for="signupUsername">Username</label>
+                    <input type="text" id="signupUsername" name="signupUsername" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" name="signupPassword" autocomplete="new-password" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupRole">Role</label>
+                    <select id="signupRole" name="signupRole" required onchange="toggleResidentFields()">
+                        <option value="">Select Role</option>
+                        <option value="cook">Cook</option>
+                        <option value="resident">Resident</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Phone Number <span style="color: #ff6b6b;">*</span></label>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel" required>
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">Required for password reset via OTP</small>
+                </div>
+                
+                <!-- Photo Field - Available for All Roles -->
+                <div class="form-group">
+                    <label for="photo">Photo (Optional)</label>
+                    <input type="file" id="photo" name="photo" accept="image/*" onchange="previewPhoto(event)">
+                    <div id="photoPreview" class="photo-preview">
+                        <img id="previewImage" src="" alt="Photo Preview" class="preview-image">
+                        <button type="button" onclick="removePhoto()" class="btn-remove-photo">Remove Photo</button>
+                    </div>
+                </div>
+                
+                <!-- Resident-Specific Fields (Hidden by default) -->
+                <div id="residentFields" class="resident-fields">
+                    <hr class="resident-divider">
+                    <h3 class="resident-title">Resident Details</h3>
+                    
+                    <div class="form-group">
+                        <label for="aadhar">Aadhar Number</label>
+                        <input type="text" id="aadhar" name="aadhar" pattern="[0-9]{12}" maxlength="12" placeholder="12-digit Aadhar number" autocomplete="off">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="foodPreference">Food Preference</label>
+                        <select id="foodPreference" name="foodPreference">
+                            <option value="">Select Preference</option>
+                            <option value="veg">Vegetarian</option>
+                            <option value="non-veg">Non-Vegetarian</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="parentName">Parent's Name</label>
+                        <input type="text" id="parentName" name="parentName" placeholder="Full name" autocomplete="name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="parentContact">Parent's Contact Number</label>
+                        <input type="tel" id="parentContact" name="parentContact" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="permanentAddress">Permanent Address</label>
+                        <textarea id="permanentAddress" name="permanentAddress" rows="3" placeholder="Enter your permanent address" autocomplete="street-address"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="emergencyContact">Emergency Contact Number</label>
+                        <input type="tel" id="emergencyContact" name="emergencyContact" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit emergency contact" autocomplete="tel">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-login">Create Account</button>
+            </form>
+
+            <!-- Reset Password Form (Hidden by default) -->
+            <form id="resetPasswordForm" class="form-hidden">
+                <div class="form-group">
+                    <label for="resetUsername">Username</label>
+                    <input type="text" id="resetUsername" name="resetUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="resetPhone">Phone Number</label>
+                    <input type="tel" id="resetPhone" name="resetPhone" pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number" required>
+                </div>
+                <button type="button" id="sendOtpBtn" class="btn-login" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">Send OTP</button>
+                
+                <div id="otpSection" style="display: none; margin-top: 20px;">
+                    <div class="form-group">
+                        <label for="otpInput">Enter OTP</label>
+                        <input type="text" id="otpInput" name="otpInput" pattern="[0-9]{6}" maxlength="6" placeholder="6-digit OTP" required>
+                        <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">OTP is valid for 5 minutes</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" name="newPassword" minlength="6" placeholder="Minimum 6 characters" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmNewPassword">Confirm New Password</label>
+                        <input type="password" id="confirmNewPassword" name="confirmNewPassword" minlength="6" placeholder="Re-enter new password" required>
+                    </div>
+                    <button type="button" id="resetPasswordBtn" class="btn-login">Reset Password</button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#" id="backToLoginLink" style="color: #ff6b6b; text-decoration: none; font-size: 14px; font-weight: 500;">← Back to Login</a>
+                </div>
+            </form>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+            
+            <div class="form-switch">
+                <p id="switchText">Don't have an account? <a href="#" id="switchLink">Create Account</a></p>
+            </div>
+        </div>
+    </div>
+    <!-- IMPORTANT: Load SMS service BEFORE auth.js -->
+    <script src="js/sms-service.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

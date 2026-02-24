@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Request - PG Food Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>PG Food Management</h1>
+            <div class="nav-user">
+                <img id="userPhoto" alt="User Photo" class="user-photo">
+                <span id="userInfo"></span>
+                <button onclick="window.location.href='dashboard.html'" class="btn-logout">Back to Dashboard</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Submit Cart Request</h2>
+        <div id="cartRequestContainer">
+            <div class="content-card">
+                <h3>Available Food Items</h3>
+                <div id="foodItemsList"></div>
+                <h3 class="section-header">Your Cart</h3>
+                <div id="cartItems"></div>
+                <button onclick="submitCartRequest()" class="btn btn-primary action-buttons">Submit Cart Request</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/permissions.js"></script>
+    <script>
+        if (sessionStorage.getItem('loggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+        requirePermission('submitCartRequest');
+
+        const username = sessionStorage.getItem('username');
+        const role = sessionStorage.getItem('role');
+        document.getElementById('userInfo').textContent = `${username} (${role})`;
+        
+        // Display user photo if available
+        const photo = sessionStorage.getItem('userPhoto');
+        const photoEl = document.getElementById('userPhoto');
+        if (photo && photoEl) {
+            photoEl.src = photo;
+            photoEl.style.display = 'inline-block';
+        }
+        
+        let cart = [];
+        
+        function loadFoodItems() {
+            const foodItems = JSON.parse(localStorage.getItem('foodItems') || '[]');
+            const availableItems = foodItems.filter(item => item.status === 'available');
+            
+            document.getElementById('foodItemsList').innerHTML = availableItems.length === 0 
+                ? '<p>No food items available.</p>'
+                : availableItems.map(item => `
+                    <div class="cart-item">
+                        <strong>${item.title}</strong> - ${item.category}
+                        <button onclick="addToCart(${item.id}, '${item.title}')" class="btn btn-primary btn-right">Add to Cart</button>
+                    </div>
+                `).join('');
+        }
+        
+        function addToCart(foodId, foodTitle) {
+            const quantity = prompt(`Enter quantity for ${foodTitle}:`, '1');
+            if (quantity && quantity > 0) {
+                cart.push({ foodId, foodTitle, quantity: parseInt(quantity) });
+                updateCartDisplay();
+            }
+        }
+        
+        function updateCartDisplay() {
+            document.getElementById('cartItems').innerHTML = cart.length === 0
+                ? '<p>Your cart is empty.</p>'
+                : cart.map((item, index) => `
+                    <div class="cart-item">
+                        ${item.foodTitle} - Quantity: ${item.quantity}
+                        <button onclick="removeFromCart(${index})" class="btn btn-secondary btn-right">Remove</button>
+                    </div>
+                `).join('');
+        }
+        
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartDisplay();
+        }
+        
+        function submitCartRequest() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            
+            const cartRequest = {
+                id: Date.now(),
+                userId: username,
+                status: 'pending',
+                items: cart,
+                createdAt: new Date().toISOString()
+            };
+            
+            const cartRequests = JSON.parse(localStorage.getItem('cartRequests') || '[]');
+            cartRequests.push(cartRequest);
+            localStorage.setItem('cartRequests', JSON.stringify(cartRequests));
+            
+            alert('Cart request submitted successfully!');
+            cart = [];
+            updateCartDisplay();
+        }
+        
+        loadFoodItems();
+        updateCartDisplay();
+    </script>
+</body>
+</html>
